@@ -1,9 +1,12 @@
-const CACHE_NAME = "skincare-offline-v4";
+const CACHE_NAME = "skincare-offline-v5";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(["./", "./index.html"]);
+      return cache.addAll([
+        "./",
+        "./index.html",
+      ]);
     })
   );
 });
@@ -36,7 +39,6 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // 离线且是页面导航时，兜底返回 index.html
           if (event.request.mode === "navigate") {
             return caches.match("./index.html");
           }
