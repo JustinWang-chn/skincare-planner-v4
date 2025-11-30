@@ -35,7 +35,33 @@
       const { useState, useEffect } = React;
 
       const DAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"];
-      const STORAGE_KEY = "skincare_planner_v2";
+      const STORAGE_KEY = "skincare_planner_v3";
+
+      // 两套主题：明月珰/石榴裙、栀子/绛蝶
+      const THEMES = {
+        mingyue: {
+          key: "mingyue",
+          label: "明月珰",
+          subLabel: "石榴裙",
+          bg: "#D6D4CD", // 明月珰
+          text: "#4A2F2A",
+          accent: "#B3392F", // 石榴裙
+          accentTextOn: "#FFF9F5",
+          border: "#CFC3B9",
+          chipBg: "#F3EDE6",
+        },
+        zhizi: {
+          key: "zhizi",
+          label: "栀子",
+          subLabel: "绛蝶",
+          bg: "#2D2E3D", // 绛蝶 深色
+          text: "#F8F7F3",
+          accent: "#FEC13F", // 栀子
+          accentTextOn: "#2D2E3D",
+          border: "#394154",
+          chipBg: "#394154",
+        },
+      };
 
       const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -136,38 +162,44 @@
       }
 
       function StepRow({ step, index, onDelete, onChange, theme }) {
-        const cardClass =
-          "flex items-start gap-3 rounded-2xl border p-3 " +
-          (theme === "pink"
-            ? "border-pink-100 bg-white"
-            : "border-sky-100 bg-white");
-        const badgeClass =
-          "mt-1 h-6 w-6 shrink-0 rounded-full text-center text-sm font-medium leading-6 " +
-          (theme === "pink"
-            ? "bg-pink-100 text-pink-700"
-            : "bg-sky-100 text-sky-700");
-        const inputClass =
-          "w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 " +
-          (theme === "pink"
-            ? "border-pink-100 focus:ring-pink-300"
-            : "border-sky-100 focus:ring-sky-300");
-        const deleteBtnClass =
-          "rounded-xl border px-3 py-2 text-xs hover:bg-opacity-80 " +
-          (theme === "pink"
-            ? "border-pink-100 bg-white text-pink-700 hover:bg-pink-50"
-            : "border-sky-100 bg-white text-sky-700 hover:bg-sky-50");
+        const cardStyle = { borderColor: theme.border };
+        const badgeStyle = {
+          backgroundColor: theme.accent,
+          color: theme.accentTextOn,
+        };
+        const inputStyle = { borderColor: theme.border };
+        const deleteStyle = {
+          borderColor: theme.border,
+          backgroundColor: theme.chipBg,
+          color: theme.text,
+        };
 
         return (
-          <div className={cardClass}>
-            <div className={badgeClass}>{index + 1}</div>
+          <div
+            className="flex items-start gap-3 rounded-2xl border p-3 bg-white"
+            style={cardStyle}
+          >
+            <div
+              className="mt-1 h-6 w-6 shrink-0 rounded-full text-center text-sm font-medium leading-6"
+              style={badgeStyle}
+            >
+              {index + 1}
+            </div>
             <div className="flex-1">
               <input
-                className={inputClass}
+                className="w-full rounded-lg bg-white px-3 py-2 text-sm outline-none focus:ring-2"
+                style={inputStyle}
                 value={step.name}
-                onChange={(e) => onChange({ ...step, name: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...step, name: e.target.value })
+                }
               />
             </div>
-            <button onClick={onDelete} className={deleteBtnClass}>
+            <button
+              onClick={onDelete}
+              className="rounded-xl border px-3 py-2 text-xs hover:opacity-90"
+              style={deleteStyle}
+            >
               删除
             </button>
           </div>
@@ -180,7 +212,8 @@
           defaultWeekPlan
         );
         const [day, setDay] = useState((new Date().getDay() + 6) % 7); // 周一为 0
-        const [theme, setTheme] = useState("pink"); // "pink" 或 "blue"
+        const [themeKey, setThemeKey] = useState("mingyue");
+        const theme = THEMES[themeKey];
 
         const focusPlan = week[String(day)] || { steps: [] };
 
@@ -204,77 +237,98 @@
           }
         }
 
-        const rootClasses =
-          "mx-auto max-w-md min-h-screen p-4 " +
-          (theme === "pink"
-            ? "bg-pink-50 text-pink-900"
-            : "bg-sky-50 text-sky-900");
-        const headerFrom =
-          theme === "pink" ? "from-pink-50" : "from-sky-50";
-        const subtitleText =
-          theme === "pink" ? "text-pink-700/80" : "text-sky-700/80";
+        const rootStyle = {
+          backgroundColor: theme.bg,
+          color: theme.text,
+        };
+
+        const headerStyle = {
+          background: `linear-gradient(to bottom, ${theme.bg}, transparent)`,
+        };
 
         return (
-          <div className={rootClasses}>
+          <div className="mx-auto max-w-md min-h-screen p-4" style={rootStyle}>
             {/* 顶部 */}
             <div
-              className={
-                "sticky top-0 z-10 mb-4 flex items-center justify-between bg-gradient-to-b " +
-                headerFrom +
-                " to-transparent py-2"
-              }
+              className="sticky top-0 z-10 mb-4 flex items-center justify-between py-2"
+              style={headerStyle}
             >
-              <div className="text-2xl font-bold tracking-wide">
-                护肤指南
-              </div>
+              <div className="text-2xl font-bold tracking-wide">护肤指南</div>
               <div className="flex gap-2 text-xs">
                 <button
-                  onClick={() => setTheme("pink")}
-                  className={
-                    "rounded-full border px-2 py-1 " +
-                    (theme === "pink"
-                      ? "border-pink-500 bg-pink-500 text-white shadow-sm"
-                      : "border-pink-200 bg-white text-pink-600")
+                  onClick={() => setThemeKey("mingyue")}
+                  className="rounded-full border px-2 py-1"
+                  style={
+                    themeKey === "mingyue"
+                      ? {
+                          backgroundColor: THEMES.mingyue.accent,
+                          borderColor: THEMES.mingyue.accent,
+                          color: THEMES.mingyue.accentTextOn,
+                          boxShadow: "0 3px 8px rgba(0,0,0,0.18)",
+                        }
+                      : {
+                          borderColor: THEMES.mingyue.accent,
+                          color: THEMES.mingyue.accent,
+                          backgroundColor: "rgba(255,255,255,0.8)",
+                        }
                   }
                 >
-                  樱花粉
+                  明月珰
                 </button>
                 <button
-                  onClick={() => setTheme("blue")}
-                  className={
-                    "rounded-full border px-2 py-1 " +
-                    (theme === "blue"
-                      ? "border-sky-500 bg-sky-500 text-white shadow-sm"
-                      : "border-sky-200 bg-white text-sky-600")
+                  onClick={() => setThemeKey("zhizi")}
+                  className="rounded-full border px-2 py-1"
+                  style={
+                    themeKey === "zhizi"
+                      ? {
+                          backgroundColor: THEMES.zhizi.accent,
+                          borderColor: THEMES.zhizi.accent,
+                          color: THEMES.zhizi.accentTextOn,
+                          boxShadow: "0 3px 8px rgba(0,0,0,0.18)",
+                        }
+                      : {
+                          borderColor: THEMES.zhizi.accent,
+                          color: THEMES.zhizi.accent,
+                          backgroundColor: "rgba(255,255,255,0.8)",
+                        }
                   }
                 >
-                  海盐蓝
+                  栀子
                 </button>
               </div>
             </div>
 
             {/* 星期选择 */}
             <section className="mb-5">
-              <div className={"mb-2 text-sm " + subtitleText}>选择星期</div>
+              <div className="mb-2 text-sm" style={{ opacity: 0.8 }}>
+                选择星期
+              </div>
               <div className="grid grid-cols-7 gap-2">
-                {DAY_LABELS.map((l, idx) => (
-                  <button
-                    key={l}
-                    onClick={() => setDay(idx)}
-                    className={
-                      "h-11 rounded-2xl border text-base font-medium transition " +
-                      (day === idx
-                        ? theme === "pink"
-                          ? "border-pink-500 bg-pink-500 text-white shadow-sm"
-                          : "border-sky-500 bg-sky-500 text-white shadow-sm"
-                        : theme === "pink"
-                        ? "border-pink-100 bg-white text-pink-700 hover:bg-pink-50"
-                        : "border-sky-100 bg-white text-sky-700 hover:bg-sky-50")
-                    }
-                  >
-                    {l}
-                  </button>
-                ))}
+                {DAY_LABELS.map((l, idx) => {
+                  const active = day === idx;
+                  const baseStyle = active
+                    ? {
+                        backgroundColor: theme.accent,
+                        borderColor: theme.accent,
+                        color: theme.accentTextOn,
+                        boxShadow: "0 4px 10px rgba(0,0,0,0.18)",
+                      }
+                    : {
+                        backgroundColor: theme.chipBg,
+                        borderColor: theme.border,
+                        color: theme.text,
+                      };
+                  return (
+                    <button
+                      key={l}
+                      onClick={() => setDay(idx)}
+                      className="h-11 rounded-2xl border text-base font-medium transition"
+                      style={baseStyle}
+                    >
+                      {l}
+                    </button>
+                  );
+                })}
               </div>
             </section>
 
@@ -285,23 +339,23 @@
                 <div className="flex gap-2">
                   <button
                     onClick={addStep}
-                    className={
-                      "rounded-xl border px-3 py-2 text-sm shadow-sm " +
-                      (theme === "pink"
-                        ? "border-pink-500 bg-pink-500 text-white hover:bg-pink-600"
-                        : "border-sky-500 bg-sky-500 text-white hover:bg-sky-600")
-                    }
+                    className="rounded-xl border px-3 py-2 text-sm shadow-sm"
+                    style={{
+                      backgroundColor: theme.accent,
+                      borderColor: theme.accent,
+                      color: theme.accentTextOn,
+                    }}
                   >
                     新增步骤
                   </button>
                   <button
                     onClick={resetAll}
-                    className={
-                      "rounded-xl border px-3 py-2 text-sm " +
-                      (theme === "pink"
-                        ? "border-pink-100 bg-white text-pink-700 hover:bg-pink-50"
-                        : "border-sky-100 bg-white text-sky-700 hover:bg-sky-50")
-                    }
+                    className="rounded-xl border px-3 py-2 text-sm"
+                    style={{
+                      backgroundColor: theme.chipBg,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
                   >
                     重置模板
                   </button>
@@ -341,6 +395,7 @@
       const root = ReactDOM.createRoot(document.getElementById("root"));
       root.render(<SkincarePlannerSimple />);
     </script>
+
 
     <!-- 注册 Service Worker，用于离线缓存 -->
     <script>
