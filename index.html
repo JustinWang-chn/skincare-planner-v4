@@ -178,55 +178,57 @@
 
       // 单条步骤
       function StepRow({ step, index, onDelete, onChange, theme }) {
-        const cardStyle = {
-          borderColor: theme.border,
-          color: theme.cardText,
-        };
-        const badgeStyle = {
-          backgroundColor: theme.accent,
-          color: theme.accentTextOn,
-        };
-        const inputStyle = {
-          borderColor: theme.border,
-          color: theme.cardText,
-        };
-        const deleteStyle = {
-          borderColor: theme.border,
-          backgroundColor: theme.chipBg,
-          color: theme.text,
-        };
+  // 统一用这一个深蓝色作为“步骤文字颜色”
+  const STEP_TEXT_COLOR = "#2D2E3D";
 
-        return (
-          <div
-            className="flex items-start gap-3 rounded-2xl border p-3 bg-white"
-            style={cardStyle}
-          >
-            <div
-              className="mt-1 h-6 w-6 shrink-0 rounded-full text-center text-sm font-medium leading-6"
-              style={badgeStyle}
-            >
-              {index + 1}
-            </div>
-            <div className="flex-1">
-              <input
-                className="w-full rounded-lg bg-white px-3 py-2 text-sm outline-none focus:ring-2"
-                style={inputStyle}
-                value={step.name}
-                onChange={(e) =>
-                  onChange({ ...step, name: e.target.value })
-                }
-              />
-            </div>
-            <button
-              onClick={onDelete}
-              className="rounded-xl border px-3 py-2 text-xs hover:opacity-90"
-              style={deleteStyle}
-            >
-              删除
-            </button>
-          </div>
-        );
-      }
+  const cardStyle = {
+    borderColor: theme.border,
+    color: STEP_TEXT_COLOR,       // 卡片里的所有普通文字
+  };
+  const badgeStyle = {
+    backgroundColor: theme.accent,
+    color: theme.accentTextOn,    // 圆圈里的数字颜色：跟按钮一致
+  };
+  const inputStyle = {
+    borderColor: theme.border,
+    color: STEP_TEXT_COLOR,       // 输入框里的字：也是这段深蓝色
+  };
+  const deleteStyle = {
+    borderColor: theme.border,
+    backgroundColor: theme.chipBg,
+    color: theme.text,
+  };
+
+  return (
+    <div
+      className="flex items-start gap-3 rounded-2xl border p-3 bg-white"
+      style={cardStyle}
+    >
+      <div
+        className="mt-1 h-6 w-6 shrink-0 rounded-full text-center text-sm font-medium leading-6"
+        style={badgeStyle}
+      >
+        {index + 1}
+      </div>
+      <div className="flex-1">
+        <input
+          className="w-full rounded-lg bg-white px-3 py-2 text-sm outline-none focus:ring-2"
+          style={inputStyle}
+          value={step.name}
+          onChange={(e) => onChange({ ...step, name: e.target.value })}
+        />
+      </div>
+      <button
+        onClick={onDelete}
+        className="rounded-xl border px-3 py-2 text-xs hover:opacity-90"
+        style={deleteStyle}
+      >
+        删除
+      </button>
+    </div>
+  );
+}
+
 
       // 主应用
       function SkincarePlannerSimple() {
