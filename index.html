@@ -35,6 +35,16 @@
       const { useState, useEffect } = React;
 
       const DAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"];
+       const DAY_TAGS = [
+  "Stridex 日",
+  "阿达帕林日",
+  "VC 日",
+  "Stridex 日",
+  "阿达帕林日",
+  "泥膜大清洁",
+  "VC 日",
+];
+
       const STORAGE_KEY = "skincare_planner_v3";
 
       // 两套主题：明月珰/石榴裙、栀子/绛蝶
@@ -45,6 +55,7 @@
           subLabel: "石榴裙",
           bg: "#D6D4CD", // 明月珰
           text: "#4A2F2A",
+          cardText: "#4A2F2A",   // ★ 新增：卡片里的字颜色（深一点的棕）
           accent: "#B3392F", // 石榴裙
           accentTextOn: "#FFF9F5",
           border: "#CFC3B9",
@@ -56,6 +67,7 @@
           subLabel: "绛蝶",
           bg: "#2D2E3D", // 绛蝶 深色
           text: "#F8F7F3",
+          cardText: "#2D2E3D",    // ★ 新增：卡片里的字颜色 = 深蓝色（和背景同色）
           accent: "#FEC13F", // 栀子
           accentTextOn: "#2D2E3D",
           border: "#FEC13F",
@@ -142,69 +154,54 @@
         return week;
       }
 
-      function useLocalStorageState(key, init) {
-        const [state, setState] = useState(() => {
-          try {
-            const raw = window.localStorage.getItem(key);
-            return raw ? JSON.parse(raw) : init();
-          } catch (e) {
-            return init();
-          }
-        });
+function StepRow({ step, index, onDelete, onChange, theme }) {
+  const cardStyle = {
+    borderColor: theme.border,
+    color: theme.cardText,          // ★ 卡片内文字统一用 cardText
+  };
+  const badgeStyle = {
+    backgroundColor: theme.accent,
+    color: theme.accentTextOn,
+  };
+  const inputStyle = {
+    borderColor: theme.border,
+    color: theme.cardText,          // ★ 输入框里的字也用 cardText
+  };
+  const deleteStyle = {
+    borderColor: theme.border,
+    backgroundColor: theme.chipBg,
+    color: theme.text,
+  };
 
-        useEffect(() => {
-          try {
-            window.localStorage.setItem(key, JSON.stringify(state));
-          } catch (e) {}
-        }, [key, state]);
-
-        return [state, setState];
-      }
-
-      function StepRow({ step, index, onDelete, onChange, theme }) {
-        const cardStyle = { borderColor: theme.border };
-        const badgeStyle = {
-          backgroundColor: theme.accent,
-          color: theme.accentTextOn,
-        };
-        const inputStyle = { borderColor: theme.border };
-        const deleteStyle = {
-          borderColor: theme.border,
-          backgroundColor: theme.chipBg,
-          color: theme.text,
-        };
-
-        return (
-          <div
-            className="flex items-start gap-3 rounded-2xl border p-3 bg-white"
-            style={cardStyle}
-          >
-            <div
-              className="mt-1 h-6 w-6 shrink-0 rounded-full text-center text-sm font-medium leading-6"
-              style={badgeStyle}
-            >
-              {index + 1}
-            </div>
-            <div className="flex-1">
-              <input
-                className="w-full rounded-lg bg-white px-3 py-2 text-sm outline-none focus:ring-2"
-                style={inputStyle}
-                value={step.name}
-                onChange={(e) =>
-                  onChange({ ...step, name: e.target.value })
-                }
-              />
-            </div>
-            <button
-              onClick={onDelete}
-              className="rounded-xl border px-3 py-2 text-xs hover:opacity-90"
-              style={deleteStyle}
-            >
-              删除
-            </button>
-          </div>
-        );
-      }
+  return (
+    <div
+      className="flex items-start gap-3 rounded-2xl border p-3 bg-white"
+      style={cardStyle}
+    >
+      <div
+        className="mt-1 h-6 w-6 shrink-0 rounded-full text-center text-sm font-medium leading-6"
+        style={badgeStyle}
+      >
+        {index + 1}
+      </div>
+      <div className="flex-1">
+        <input
+          className="w-full rounded-lg bg-white px-3 py-2 text-sm outline-none focus:ring-2"
+          style={inputStyle}
+          value={step.name}
+          onChange={(e) => onChange({ ...step, name: e.target.value })}
+        />
+      </div>
+      <button
+        onClick={onDelete}
+        className="rounded-xl border px-3 py-2 text-xs hover:opacity-90"
+        style={deleteStyle}
+      >
+        删除
+      </button>
+    </div>
+  );
+}
 
       function SkincarePlannerSimple() {
         const [week, setWeek] = useLocalStorageState(
@@ -214,6 +211,9 @@
         const [day, setDay] = useState((new Date().getDay() + 6) % 7); // 周一为 0
         const [themeKey, setThemeKey] = useState("mingyue");
         const theme = THEMES[themeKey];
+          const dayLabel = "周" + DAY_LABELS[day];
+  const dayTag = DAY_TAGS[day] || "";
+
 
         const focusPlan = week[String(day)] || { steps: [] };
 
@@ -361,6 +361,15 @@
                   </button>
                 </div>
               </div>
+
+                {/* ★ 小标签行 */}
+  <div
+    className="mb-3 text-xs"
+    style={{ opacity: 0.9, color: theme.accent }}
+  >
+    {dayLabel} · {dayTag}
+  </div>
+
               <div className="grid gap-3">
                 {focusPlan.steps.map((s, i) => (
                   <StepRow
