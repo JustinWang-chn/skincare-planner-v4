@@ -1,4 +1,4 @@
-const CACHE_NAME = "skincare-offline-v5";
+const CACHE_NAME = "skincare-offline-v4";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
